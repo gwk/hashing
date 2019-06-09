@@ -149,7 +149,7 @@ static struct PyMethodDef module_functions[] = {
 
 static struct PyModuleDef module_def = {
   PyModuleDef_HEAD_INIT,
-  .m_name = "cpython",
+  .m_name = "hashing_cpy",
   .m_doc = hashing_doc,
   .m_size = 0,
   .m_methods = module_functions,
@@ -158,7 +158,7 @@ static struct PyModuleDef module_def = {
 
 
 PyMODINIT_FUNC
-PyInit_cpython(void) {
+PyInit_hashing_cpy(void) {
 
   PyObject *module = PyModule_Create(&module_def);
   if (!module) return NULL;

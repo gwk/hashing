@@ -1,2 +1,2 @@
 
-from .cpython import Aquahash, aquahash
+from .hashing_cpy import Aquahash, aquahash

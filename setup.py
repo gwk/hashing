@@ -6,8 +6,8 @@ with open('readme.md', 'r') as f:
   long_description = f.read()
 
 extension = Extension(
-  'hashing.cpython',
-  sources=['hashing/cpython.cpp'],
+  'hashing.hashing_cpy',
+  sources=['hashing/hashing_cpy.cpp'],
   extra_compile_args=['-std=c++11', '-maes', '-Wall'],
   include_dirs=[])
 
