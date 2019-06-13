@@ -14,6 +14,9 @@ _default: test typecheck
 
 _phony:
 
+build:
+	py setup.py build
+
 clean:
 	rm -rf _build/*
 	rm -rf hashing/*.so
