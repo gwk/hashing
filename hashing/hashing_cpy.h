@@ -20,6 +20,8 @@ typedef struct {
 } Aquahash;
 
 
+// `class Aquahash`.
+
 inline static void Aquahash_dealloc(Aquahash *self) {
   if (self->lock) {
     PyThread_free_lock(self->lock);
@@ -28,8 +30,9 @@ inline static void Aquahash_dealloc(Aquahash *self) {
 }
 
 
-inline static Aquahash *Aquahash_new(PyTypeObject *type, Py_buffer salt) {
-  Aquahash *self = (Aquahash *) type->tp_alloc(type, 0);
+// `def __new__(cls, salt: Union[str, ByteString] = Ellipsis) -> 'Aquahash'`.
+inline static Aquahash *Aquahash___new__(PyTypeObject *cls, Py_buffer salt) {
+  Aquahash *self = (Aquahash *) cls->tp_alloc(cls, 0);
   if (!self) return NULL;
 
   __m128i salt_val = {0, 0};
@@ -40,8 +43,10 @@ inline static Aquahash *Aquahash_new(PyTypeObject *type, Py_buffer salt) {
 }
 
 
+// `def update(self, data: Union[str, ByteString]) -> None`.
 inline static void Aquahash_update(Aquahash *self, Py_buffer data) {
   // Release the GIL for large inputs.
+  // This strategy is copied from the standard library blake2 implementation.
   bool should_allow_threads = (data.len >= GIL_MIN_SIZE);
   if (should_allow_threads && !self->lock) {
     self->lock = PyThread_allocate_lock(); // Can fail, resulting in NULL.
@@ -58,24 +63,29 @@ inline static void Aquahash_update(Aquahash *self, Py_buffer data) {
 }
 
 
-inline static PyObject *Aquahash_digest(Aquahash *self) {
+// `def digest(self) -> bytes`.
+inline static PyBytesObject *Aquahash_digest(Aquahash *self) {
   AquaHash copied_state = self->state;
   __m128i digest = copied_state.Finalize();
-  return Py_BuildValue("y#", &digest, sizeof(digest));
+  return (PyBytesObject *)Py_BuildValue("y#", &digest, sizeof(digest));
 }
 
 
-inline static PyObject *Aquahash_digest_size(Aquahash *self) {
-  return Py_BuildValue("i", 16);
-}
-
-
+// `def block_size(self) -> int`.
 inline static PyObject *Aquahash_block_size(Aquahash *self) {
   return Py_BuildValue("i", 64);
 }
 
 
-inline static PyObject *hashing_aquahash(Py_buffer data, Py_buffer salt) {
+// `def digest_size(self) -> int`.
+inline static PyObject *Aquahash_digest_size(Aquahash *self) {
+  return Py_BuildValue("i", 16);
+}
+
+
+
+// `def aquahash(data: Union[str, ByteString], salt: Union[str, ByteString] = Ellipsis) -> bytes`.
+inline static PyBytesObject *aquahash(Py_buffer data, Py_buffer salt) {
 
   __m128i salt_val = {0, 0};
   if (salt.len) memcpy(&salt_val, salt.buf, min(salt.len, (long)sizeof(salt_val)));
@@ -89,6 +99,5 @@ inline static PyObject *hashing_aquahash(Py_buffer data, Py_buffer salt) {
     digest = AquaHash::Hash((uint8_t*)data.buf, data.len, salt_val);
   }
 
-  return Py_BuildValue("y#", &digest, sizeof(digest));
+  return (PyBytesObject *)Py_BuildValue("y#", &digest, sizeof(digest));
 }
-

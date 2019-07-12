@@ -10,5 +10,7 @@ __pycache__/
 # Project.
 _build/
 _misc/
+.vscode/
 todo.txt
+*.gen.*
 *.so
